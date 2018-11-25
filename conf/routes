@@ -7,3 +7,17 @@ GET     /                           controllers.HomeController.index
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+# Books API
+GET     /library/books              controllers.BookController.list
+GET     /library/books/:isbn        controllers.BookController.get(isbn: String)
+POST    /library/books              controllers.BookController.save
+PUT     /library/books              controllers.BookController.update
+DELETE  /library/books/:isbn        controllers.BookController.delete(isbn: String)
+
+# todo DVD API
+GET     /library/dvd                controllers.DvdController.list
+GET     /library/dvd/:isbn          controllers.DvdController.get(isbn: String)
+POST    /library/dvd                controllers.DvdController.save
+PUT     /library/dvd                controllers.DvdController.update
+DELETE  /library/dvd/:isbn          controllers.DvdController.delete(isbn: String)

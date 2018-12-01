@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -48,7 +49,8 @@ public class DvdController extends Controller {
         if (requestBody == null) {
             return badRequest("Empty POST request");
         } else {
-            dvd = new ObjectMapper().convertValue(requestBody, Dvd.class);
+            dvd = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY).
+                    convertValue(requestBody, Dvd.class);
             try {
                 dvdDao.insertDvd(dvd);
                 // Create new JSON object node

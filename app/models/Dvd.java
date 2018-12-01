@@ -1,15 +1,18 @@
 package models;
 
 import io.ebean.annotation.DbArray;
-import utils.DateTime;
+import utils.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
 @Table(name = "dvd")
 public class Dvd extends LibraryItem {
+
+    public final static int MAX_BORROWAL_PERIOD = 3;
 
     @DbArray
     private List<String> audio; // list of available audio languages embedded in DVD
@@ -19,7 +22,7 @@ public class Dvd extends LibraryItem {
     @DbArray
     private List<String> actors; // actors who act in the DVD title
 
-    public Dvd(String ISBN, String title, String section, DateTime pubDate, Reader currentReader, DateTime borrowedOn,
+    public Dvd(String ISBN, String title, String section, Date pubDate, Reader currentReader, Date borrowedOn,
                List<String> audio, List<String> subtitles, String producer, List<String> actors) {
         super(ISBN, title, section, pubDate, currentReader, borrowedOn);
         this.audio = audio;
@@ -59,6 +62,5 @@ public class Dvd extends LibraryItem {
     public void setActors(List<String> actors) {
         this.actors = actors;
     }
-
 
 }

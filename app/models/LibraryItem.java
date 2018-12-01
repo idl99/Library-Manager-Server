@@ -3,12 +3,16 @@ package models;
 import io.ebean.Model;
 import io.ebean.annotation.DbJson;
 import io.ebean.annotation.NotNull;
-import utils.DateTime;
+import utils.Date;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @MappedSuperclass
-public abstract class LibraryItem extends Model {
+public abstract class LibraryItem extends Model implements Comparable<LibraryItem>{
+
+    public static final double primaryPenalty = 4.8;
+    public static final double secondaryPenalty = 12;
 
     @Id
     protected String ISBN; // isbn of item
@@ -19,20 +23,20 @@ public abstract class LibraryItem extends Model {
     protected String section; // section to which item belongs
 
     @DbJson
-    protected DateTime pubDate; // date on which the item has been published
+    protected Date pubDate; // date on which the item has been published
 
     @ManyToOne
     protected Reader currentReader; // reader who has currently borrowed the book
 
     @DbJson
-    protected DateTime borrowedOn; // date on which the book has been borrowed
+    protected Date borrowedOn; // date on which the book has been borrowed
 
     // Default empty constructor
     public LibraryItem(){
     }
 
     public LibraryItem(String ISBN, String title, String section,
-                       DateTime pubDate, Reader currentReader, DateTime borrowedOn) {
+                       Date pubDate, Reader currentReader, Date borrowedOn) {
         this.ISBN = ISBN;
         this.title = title;
         this.section = section;
@@ -65,11 +69,11 @@ public abstract class LibraryItem extends Model {
         this.section = section;
     }
 
-    public final DateTime getPubDate() {
+    public final Date getPubDate() {
         return pubDate;
     }
 
-    public final void setPubDate(DateTime pubDate) {
+    public final void setPubDate(Date pubDate) {
         this.pubDate = pubDate;
     }
 
@@ -81,13 +85,39 @@ public abstract class LibraryItem extends Model {
         this.currentReader = currentReader;
     }
 
-    public final DateTime getBorrowedOn() {
+    public final Date getBorrowedOn() {
         return borrowedOn;
     }
 
-    public final void setBorrowedOn(DateTime borrowedOn) {
+    public final void setBorrowedOn(Date borrowedOn) {
         this.borrowedOn = borrowedOn;
     }
+
+    public static BigDecimal calculateLateFee(String itemType, Date returned, Date borrowed){
+        int difference = Date.getDifference(returned,borrowed);
+        int borrowalPeriod = 0;
+        switch(itemType){
+            case "Book":
+                borrowalPeriod = Book.MAX_BORROWAL_PERIOD;
+                break;
+            case "Dvd":
+                borrowalPeriod = Dvd.MAX_BORROWAL_PERIOD;
+                break;
+        }
+        if(difference > borrowalPeriod){
+            int overdueBy = difference - borrowalPeriod;
+            BigDecimal fee = BigDecimal.valueOf(0);
+            if(overdueBy<=3){
+                fee = fee.add(BigDecimal.valueOf(primaryPenalty).multiply(BigDecimal.valueOf(overdueBy)));
+            } else {
+                fee = fee.add(BigDecimal.valueOf(primaryPenalty).multiply(BigDecimal.valueOf(3)));
+                fee =fee.add(BigDecimal.valueOf(secondaryPenalty).multiply(BigDecimal.valueOf(overdueBy-3)));
+            }
+            return fee;
+        }else{
+            return BigDecimal.valueOf(0.0);
+        }
+    };
 
     @Override
     public final boolean equals(Object obj) {
@@ -99,6 +129,11 @@ public abstract class LibraryItem extends Model {
         // check if same library-item-wise (same ISBN)
         LibraryItem item= (LibraryItem) obj;
         return ISBN.equals(item.getISBN());
+    }
+
+    @Override
+    public int compareTo(LibraryItem o) {
+        return this.getISBN().compareTo(o.getISBN());
     }
 
 }

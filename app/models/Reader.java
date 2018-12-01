@@ -25,6 +25,15 @@ public class Reader extends Model {
      * Default constructor
      */
     public Reader() {
+        super();
+    }
+
+    public Reader(String readerId, String name, String mobile, String email) {
+        this();
+        this.readerId = readerId;
+        this.name = name;
+        this.mobile = mobile;
+        this.email = email;
     }
 
     public String getReaderId() {

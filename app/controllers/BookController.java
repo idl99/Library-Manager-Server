@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -48,7 +49,7 @@ public class BookController extends Controller {
         if (requestBody == null) {
             return badRequest("Empty POST request");
         } else {
-            book = new ObjectMapper().convertValue(requestBody, Book.class);
+            book = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY).convertValue(requestBody, Book.class);
             try {
                 bookDao.insertBook(book);
                 // Create new JSON object node
@@ -70,7 +71,7 @@ public class BookController extends Controller {
         if (requestBody == null) {
             return badRequest("Empty POST request.");
         } else {
-            book = new ObjectMapper().convertValue(requestBody, Book.class);
+            book = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY).convertValue(requestBody, Book.class);
             try {
                 bookDao.updateBook(book);
                 return ok("Successfully updated.");

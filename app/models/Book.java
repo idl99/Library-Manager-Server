@@ -1,16 +1,22 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.ebean.annotation.DbArray;
-import utils.DateTime;
+import play.Logger;
+import utils.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
 @Table(name = "book")
-public class Book extends LibraryItem implements Comparable<Book>{
+public class Book extends LibraryItem{
 
+    public final static int MAX_BORROWAL_PERIOD = 7;
+
+    @JsonProperty("authors")
     @DbArray
     private List<String> authors; // list of author/s who've written the book
 
@@ -18,7 +24,7 @@ public class Book extends LibraryItem implements Comparable<Book>{
 
     private int noOfPages; // number of pages in the book
 
-    public Book(String ISBN, String title, String section, DateTime pubDate, Reader currentReader, DateTime borrowedOn,
+    public Book(String ISBN, String title, String section, Date pubDate, Reader currentReader, Date borrowedOn,
                 List<String> authors, String publisher, int noOfPages) {
         super(ISBN, title, section, pubDate, currentReader, borrowedOn);
         this.authors = authors;
@@ -48,11 +54,6 @@ public class Book extends LibraryItem implements Comparable<Book>{
 
     public void setNoOfPages(int noOfPages) {
         this.noOfPages = noOfPages;
-    }
-
-    @Override
-    public int compareTo(Book o) {
-        return this.getISBN().compareTo(o.getISBN());
     }
 
 }

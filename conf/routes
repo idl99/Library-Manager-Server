@@ -9,9 +9,9 @@ GET     /                           controllers.HomeController.index
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 # Westminster Library Manager Services Endpoint
-GET     /library/report              controllers.WestminsterLibraryManager.report
-PUT     /library/borrow              controllers.WestminsterLibraryManager.borrowItem
-PUT     /library/return              controllers.WestminsterLibraryManager.returnItem
+GET     /library/report             controllers.WestminsterLibraryManager.report(generatedOn: String)
+PUT     /library/borrow             controllers.WestminsterLibraryManager.borrowItem
+PUT     /library/return             controllers.WestminsterLibraryManager.returnItem
 
 
 # Books API endpoint

@@ -1,7 +1,7 @@
 package models;
 
 import io.ebean.annotation.DbArray;
-import utils.Date;
+import utils.MyDateUtil;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -21,7 +21,7 @@ public class Dvd extends LibraryItem {
     @DbArray
     private List<String> actors; // actors who act in the DVD title
 
-    public Dvd(String ISBN, String title, String section, Date pubDate, Reader currentReader, Date borrowedOn,
+    public Dvd(String ISBN, String title, String section, MyDateUtil pubDate, Reader currentReader, MyDateUtil borrowedOn,
                List<String> audio, List<String> subtitles, String producer, List<String> actors) {
         super(ISBN, title, section, pubDate, currentReader, borrowedOn);
         this.audio = audio;

@@ -3,7 +3,7 @@ package models;
 import io.ebean.Model;
 import io.ebean.annotation.DbJson;
 import io.ebean.annotation.NotNull;
-import utils.Date;
+import utils.MyDateUtil;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 @MappedSuperclass
 public abstract class LibraryItem extends Model implements Comparable<LibraryItem>{
 
-    public static final double primaryPenalty = 4.8;
-    public static final double secondaryPenalty = 12;
+    public static final double PRIMARY_PENALTY = 4.8;
+    public static final double SECONDARY_PENALTY = 12;
 
     @Id
     protected String ISBN; // isbn of item
@@ -23,20 +23,20 @@ public abstract class LibraryItem extends Model implements Comparable<LibraryIte
     protected String section; // section to which item belongs
 
     @DbJson
-    protected Date pubDate; // date on which the item has been published
+    protected MyDateUtil pubDate; // date on which the item has been published
 
     @ManyToOne
     protected Reader currentReader; // reader who has currently borrowed the book
 
     @DbJson
-    protected Date borrowedOn; // date on which the book has been borrowed
+    protected MyDateUtil borrowedOn; // date on which the book has been borrowed
 
     // Default empty constructor
     public LibraryItem(){
     }
 
     public LibraryItem(String ISBN, String title, String section,
-                       Date pubDate, Reader currentReader, Date borrowedOn) {
+                       MyDateUtil pubDate, Reader currentReader, MyDateUtil borrowedOn) {
         this.ISBN = ISBN;
         this.title = title;
         this.section = section;
@@ -69,11 +69,11 @@ public abstract class LibraryItem extends Model implements Comparable<LibraryIte
         this.section = section;
     }
 
-    public final Date getPubDate() {
+    public final MyDateUtil getPubDate() {
         return pubDate;
     }
 
-    public final void setPubDate(Date pubDate) {
+    public final void setPubDate(MyDateUtil pubDate) {
         this.pubDate = pubDate;
     }
 
@@ -85,16 +85,16 @@ public abstract class LibraryItem extends Model implements Comparable<LibraryIte
         this.currentReader = currentReader;
     }
 
-    public final Date getBorrowedOn() {
+    public final MyDateUtil getBorrowedOn() {
         return borrowedOn;
     }
 
-    public final void setBorrowedOn(Date borrowedOn) {
+    public final void setBorrowedOn(MyDateUtil borrowedOn) {
         this.borrowedOn = borrowedOn;
     }
 
-    public static BigDecimal calculateLateFee(String itemType, Date returned, Date borrowed){
-        int difference = Date.getDifference(returned,borrowed);
+    public static BigDecimal calculateLateFee(String itemType, MyDateUtil returned, MyDateUtil borrowed){
+        int difference = MyDateUtil.getDifference(returned,borrowed);
         int borrowalPeriod = 0;
         switch(itemType){
             case "Book":
@@ -108,10 +108,10 @@ public abstract class LibraryItem extends Model implements Comparable<LibraryIte
             int overdueBy = difference - borrowalPeriod;
             BigDecimal fee = BigDecimal.valueOf(0);
             if(overdueBy<=3){
-                fee = fee.add(BigDecimal.valueOf(primaryPenalty).multiply(BigDecimal.valueOf(overdueBy)));
+                fee = fee.add(BigDecimal.valueOf(PRIMARY_PENALTY).multiply(BigDecimal.valueOf(overdueBy)));
             } else {
-                fee = fee.add(BigDecimal.valueOf(primaryPenalty).multiply(BigDecimal.valueOf(3)));
-                fee =fee.add(BigDecimal.valueOf(secondaryPenalty).multiply(BigDecimal.valueOf(overdueBy-3)));
+                fee = fee.add(BigDecimal.valueOf(PRIMARY_PENALTY).multiply(BigDecimal.valueOf(3)));
+                fee =fee.add(BigDecimal.valueOf(SECONDARY_PENALTY).multiply(BigDecimal.valueOf(overdueBy-3)));
             }
             return fee;
         }else{

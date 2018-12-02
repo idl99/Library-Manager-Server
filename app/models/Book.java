@@ -2,7 +2,7 @@ package models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.ebean.annotation.DbArray;
-import utils.Date;
+import utils.MyDateUtil;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -22,7 +22,7 @@ public class Book extends LibraryItem{
 
     private int noOfPages; // number of pages in the book
 
-    public Book(String ISBN, String title, String section, Date pubDate, Reader currentReader, Date borrowedOn,
+    public Book(String ISBN, String title, String section, MyDateUtil pubDate, Reader currentReader, MyDateUtil borrowedOn,
                 List<String> authors, String publisher, int noOfPages) {
         super(ISBN, title, section, pubDate, currentReader, borrowedOn);
         this.authors = authors;

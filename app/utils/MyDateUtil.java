@@ -1,22 +1,22 @@
 package utils;
 
-public class Date {
+public class MyDateUtil {
 
     private int day;
     private int month;
     private int year;
 
     // Default empty constructor required by Ebeans to resolve deserialization of JsonObject stored in database
-    public Date(){
+    public MyDateUtil(){
     }
 
-    public Date(int day, int month, int year) {
+    public MyDateUtil(int day, int month, int year) {
         this.day = day;
         this.month = month;
         this.year = year;
     }
 
-    public Date(String date){
+    public MyDateUtil(String date){
         this.day = Integer.valueOf(date.split("/")[0]);
         this.month = Integer.valueOf(date.split("/")[1]);
         this.year = Integer.valueOf(date.split("/")[2]);
@@ -46,11 +46,11 @@ public class Date {
         this.year = year;
     }
 
-    public static int getDifference(Date date1, Date date2){
+    public static int getDifference(MyDateUtil date1, MyDateUtil date2){
         return daysElapsed(date1) - daysElapsed(date2);
     };
 
-    public static int daysElapsed(Date date){
+    public static int daysElapsed(MyDateUtil date){
 
         final int[] CUMULATIVE_DAYS = new int[]{0,31,59,90,120,151,181,212,243,273,304,334};
         final int[] LEAP_CUMULATIVE_DAYS = new int[]{0,31,60,91,121,152,182,213,244,274,305,335};

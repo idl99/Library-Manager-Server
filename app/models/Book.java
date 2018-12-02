@@ -2,12 +2,10 @@ package models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.ebean.annotation.DbArray;
-import play.Logger;
 import utils.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 import java.util.List;
 
 @Entity

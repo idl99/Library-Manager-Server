@@ -21,8 +21,8 @@ public class DvdController extends Controller {
     DvdDao dvdDao;
 
     @Inject
-    public DvdController(DvdDao bookDao) {
-        this.dvdDao = bookDao;
+    public DvdController(DvdDao dvdDao) {
+        this.dvdDao = dvdDao;
     }
 
     public Result list() {

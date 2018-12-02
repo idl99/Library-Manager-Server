@@ -10,15 +10,14 @@ import models.Book;
 import models.Dvd;
 import models.LibraryItem;
 import models.Reader;
-import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import utils.Date;
+import utils.MyDateUtil;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class WestminsterLibraryManager extends Controller implements LibraryManager {
@@ -53,14 +52,14 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
                     item = bookDao.getBookByIsbn(isbn);
                     reader.setReaderId(readerId);
                     item.setCurrentReader(reader);
-                    item.setBorrowedOn(new Date(borrowedOn));
+                    item.setBorrowedOn(new MyDateUtil(borrowedOn));
                     bookDao.updateBook((Book)item);
                     break;
                 case("Dvd"):
                     item = dvdDao.getDvdByIsbn(isbn);
                     reader.setReaderId(readerId);
                     item.setCurrentReader(reader);
-                    item.setBorrowedOn(new Date(borrowedOn));
+                    item.setBorrowedOn(new MyDateUtil(borrowedOn));
                     dvdDao.updateDvd((Dvd)item);
                     break;
             }
@@ -78,7 +77,7 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
 
             String type = requestBody.get("type").textValue();
             String isbn = requestBody.get("isbn").textValue();
-            Date returnedOn = new Date(requestBody.get("returnedOn").textValue());
+            MyDateUtil returnedOn = new MyDateUtil(requestBody.get("returnedOn").textValue());
 
             LibraryItem item;
             BigDecimal dueFee = null;
@@ -111,35 +110,48 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
 //    }
 //
     @Override
-    public Result report() {
+    public Result report(String generatedOn) {
 
         Set<Book> setOfBook = Ebean.find(Book.class).where().not().eq("borrowed_on",null).findSet();
         Set<Dvd> setOfDvd = Ebean.find(Dvd.class).where().not().eq("borrowed_on",null).findSet();
-        Set<LibraryItem> libraryItems = new HashSet<>();
+        Set<LibraryItem> libraryItems = new LinkedHashSet<>();
         libraryItems.addAll(setOfBook);
         libraryItems.addAll(setOfDvd);
 
         ObjectNode result = Json.newObject();
         ArrayNode arrayOfItems = result.putArray("items");
+
         for(LibraryItem item: libraryItems){
+
             ObjectNode itemNode = Json.newObject();
+
             itemNode.put("isbn",item.getISBN());
             itemNode.put("title",item.getTitle());
+
             if(item.getBorrowedOn() == null) {
                 itemNode.put("borrowedOn","");
             } else{
                 itemNode.put("borrowedOn",item.getBorrowedOn().toString());
             }
-            itemNode.put("overdueBy",""); // TODO
+
             if(item instanceof Book){
-                // TODO
-                itemNode.put("fee","");
+                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generatedOn),item.getBorrowedOn()) -
+                        Book.MAX_BORROWAL_PERIOD);
+                itemNode.put("fee", LibraryItem.calculateLateFee("Book",new MyDateUtil(generatedOn),
+                        item.getBorrowedOn()));
             } else if(item instanceof Dvd){
-                // TODO
-                itemNode.put("fee","");
+                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generatedOn),item.getBorrowedOn())-
+                        Dvd.MAX_BORROWAL_PERIOD);
+                itemNode.put("fee", LibraryItem.calculateLateFee("Dvd",new MyDateUtil(generatedOn),
+                        item.getBorrowedOn()));
             }
+
             arrayOfItems.add(itemNode);
+
         }
+
         return ok(result);
+
     }
+
 }

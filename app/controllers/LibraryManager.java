@@ -10,6 +10,6 @@ public interface LibraryManager {
 //
 //    Result reserveItem(String isbn, Reader readerId); // method to reserve Item
 //
-    Result report(); // method to get summary of all overdue Item and fees
+    Result report(String generatedOn); // method to get summary of all overdue Item and fees
 
 }

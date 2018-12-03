@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dao.BookDao;
 import dao.DvdDao;
 import io.ebean.Ebean;
-import models.Book;
-import models.Dvd;
-import models.LibraryItem;
-import models.Reader;
+import models.*;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -20,11 +17,30 @@ import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+
+/**
+ * Controller class which services common Library business functions requested by the Client
+ * Extends Controller class of play.mvc
+ * Implements custom interface Library Manager
+ */
 public class WestminsterLibraryManager extends Controller implements LibraryManager {
 
+    /**
+     * Reference to Book Data Access Object to pass instructions and execute Book-related CRUD operations
+     */
     BookDao bookDao;
+
+    /**
+     * Reference to Dvd Data Access Object to pass instructions and execute Dvd-related CRUD operations
+     */
     DvdDao dvdDao;
 
+
+    /**
+     * Constructor method. Uses Guice dependency injection to resolve BookDao and DvdDao dependency
+     * @param bookDaoImpl - Book Dao Implementation instance
+     * @param dvdDaoImpl - Dvd Dao Implementation instance
+     */
     @Inject
     public WestminsterLibraryManager(BookDao bookDaoImpl, DvdDao dvdDaoImpl) {
         super();
@@ -32,11 +48,20 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
         this.dvdDao = dvdDaoImpl;
     }
 
+
+    /**
+     * Method which services business logic related to Item borrowal.
+     * @return - returns an OK HTTP response to Client if Item borrowal logic is successfully executed.
+     */
     @Override
     public Result borrowItem() {
+
         JsonNode requestBody = request().body().asJson();
+
         if (requestBody == null) {
-            return badRequest("Empty POST request.");
+
+            return badRequest(Json.toJson("Empty POST request."));
+
         } else {
 
             String type = requestBody.get("type").textValue();
@@ -63,16 +88,40 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
                     dvdDao.updateDvd((Dvd)item);
                     break;
             }
-            return ok();
+
+            ItemTransactionLog log = ItemTransactionLog.getLogByItem(isbn);
+            log.incrementNoOfTimesBorrowed(); // Increase borrow count in ItemTransactionLog
+            log.update();
+
+            // Removing reader from list of reservations, if reader has made reservation for item before
+            Reservation reservation = Reservation.getReservationById(isbn);
+            if(reservation!=null){
+                if(reservation.getListOfReaders().contains(readerId)){
+                    reservation.getListOfReaders().remove(readerId);
+                    reservation.update();
+                }
+            }
+
+            return ok(Json.toJson("Item successfully borrowed. Please return the item within the overdue period to avoid " +
+                    "any late item return fees."));
+
         }
     }
 
+
+    /**
+     * Method which services business logic related to Item return.
+     * @return - returns an OK HTTP response with any late item return fee if needed to be paid off by Reader.
+     */
     @Override
     public Result returnItem() {
 
         JsonNode requestBody = request().body().asJson();
+
         if (requestBody == null) {
+
             return badRequest("Empty POST request.");
+
         } else {
 
             String type = requestBody.get("type").textValue();
@@ -85,35 +134,76 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
             switch (type){
                 case("Book"):
                     item = bookDao.getBookByIsbn(isbn);
-                    dueFee = LibraryItem.calculateLateFee("Book", returnedOn, item.getBorrowedOn());
-                    item.setCurrentReader(null);
-                    item.setBorrowedOn(null);
+                    ItemTransactionLog.updateOnItemReturn(item,returnedOn); // Update ItemTransactionLog that item
+                                                                            // has been returned by user
+                    dueFee = item.calculateLateFee(returnedOn, item.getBorrowedOn(), Book.MAX_BORROWAL_PERIOD);
+                    item.setCurrentReader(null); // Reset current reader attribute value
+                    item.setBorrowedOn(null); // Reset borrowed on attribute value
                     bookDao.updateBook((Book)item);
+
                     break;
                 case("Dvd"):
                     item = dvdDao.getDvdByIsbn(isbn);
-                    dueFee = LibraryItem.calculateLateFee("Dvd", returnedOn, item.getBorrowedOn());
-                    item.setCurrentReader(null);
-                    item.setBorrowedOn(null);
+                    ItemTransactionLog.updateOnItemReturn(item,returnedOn); // Update ItemTransactionLog that item
+                                                                            // has been returned by user
+                    dueFee = item.calculateLateFee(returnedOn, item.getBorrowedOn(), Dvd.MAX_BORROWAL_PERIOD);
+                    item.setCurrentReader(null); // Reset current reader attribute value
+                    item.setBorrowedOn(null); // Reset borrowed on attribute value
                     dvdDao.updateDvd((Dvd)item);
+
                     break;
             }
 
-            return ok(dueFee.toString());
+            return ok(Json.toJson(String.format("Successfully returned book. Due fee is $%s",dueFee.toString())));
 
         }
     }
-//
-//    @Override
-//    public Result reserveItem(String isbn, Reader readerId) {
-//        return null;
-//    }
-//
+
+
+    /**
+     * Method which services business logic related to Item reservation.
+     * @return - an OK HTTP result with the estimated waiting time based on the reservation queue
+     */
     @Override
-    public Result report(String generatedOn) {
+    public Result reserveItem() {
+        JsonNode requestBody = request().body().asJson();
+        String type = requestBody.get("type").textValue();
+        String isbn = requestBody.get("isbn").textValue();
+        String readerId = requestBody.get("readerId").textValue();
+
+        Reservation reservation = Reservation.getReservationById(isbn);
+        reservation.getListOfReaders().add(readerId);
+        reservation.update();
+
+        int avgBorrowalPeriod = ItemTransactionLog.getLogByItem(isbn).getAverageBorrowalPeriod();
+        int noOfReadersInQueue = reservation.getListOfReaders().size();
+
+        LibraryItem item;
+        ObjectNode result = Json.newObject();
+        if (type.equals("Book")) {
+            Book book = bookDao.getBookByIsbn(isbn);
+        } else if(type.equals("Dvd")) {
+            Dvd dvd = dvdDao.getDvdByIsbn(isbn);
+        }
+
+        return ok(Json.toJson(String.format("Successfully reserved item. Estimated waiting time is %s days.",
+                (noOfReadersInQueue * avgBorrowalPeriod))));
+
+    }
+
+    /**
+     * Method that services the business logic for reporting on Item Borrowals, their borrowal status
+     * (number of days which they are overdue by), and late return fee estimates.
+     * @param generateFor - the date for which the report needs to be generated for
+     * @return - a custom JSON object, with the overude items, their isbn, title, date on which they were borrowed,
+     * the number of days by which they are overdue, and the late return fee
+     */
+    @Override
+    public Result report(String generateFor) {
 
         Set<Book> setOfBook = Ebean.find(Book.class).where().not().eq("borrowed_on",null).findSet();
         Set<Dvd> setOfDvd = Ebean.find(Dvd.class).where().not().eq("borrowed_on",null).findSet();
+
         Set<LibraryItem> libraryItems = new LinkedHashSet<>();
         libraryItems.addAll(setOfBook);
         libraryItems.addAll(setOfDvd);
@@ -135,15 +225,16 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
             }
 
             if(item instanceof Book){
-                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generatedOn),item.getBorrowedOn()) -
+                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generateFor),item.getBorrowedOn()) -
                         Book.MAX_BORROWAL_PERIOD);
-                itemNode.put("fee", LibraryItem.calculateLateFee("Book",new MyDateUtil(generatedOn),
-                        item.getBorrowedOn()));
+                itemNode.put("fee", item.calculateLateFee(new MyDateUtil(generateFor),item.getBorrowedOn(),
+                        Book.MAX_BORROWAL_PERIOD));
+
             } else if(item instanceof Dvd){
-                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generatedOn),item.getBorrowedOn())-
+                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generateFor),item.getBorrowedOn())-
                         Dvd.MAX_BORROWAL_PERIOD);
-                itemNode.put("fee", LibraryItem.calculateLateFee("Dvd",new MyDateUtil(generatedOn),
-                        item.getBorrowedOn()));
+                itemNode.put("fee", item.calculateLateFee(new MyDateUtil(generateFor),item.getBorrowedOn(),
+                        Dvd.MAX_BORROWAL_PERIOD));
             }
 
             arrayOfItems.add(itemNode);

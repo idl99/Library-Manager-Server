@@ -8,6 +8,14 @@ import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import java.util.Set;
 
+
+/**
+ * Interface that declares the contract for behavior that all Dvd Data Access Object Implementations should
+ * define and implement.
+ *
+ * @ImplementedBy tells Guice which classes (DvdDaoImpl.class) implements this interface.
+ *
+ */
 @ImplementedBy(DvdDaoImpl.class)
 public interface DvdDao {
 

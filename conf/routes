@@ -12,18 +12,18 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /library/report             controllers.WestminsterLibraryManager.report(generatedOn: String)
 PUT     /library/borrow             controllers.WestminsterLibraryManager.borrowItem
 PUT     /library/return             controllers.WestminsterLibraryManager.returnItem
-
+PUT     /library/reserve            controllers.WestminsterLibraryManager.reserveItem
 
 # Books API endpoint
 GET     /library/books              controllers.BookController.list
-GET     /library/books/:isbn        controllers.BookController.get(isbn: String)
+GET     /library/books/:itemIsbn    controllers.BookController.get(itemIsbn: String)
 POST    /library/books              controllers.BookController.save
 PUT     /library/books              controllers.BookController.update
-DELETE  /library/books/:isbn        controllers.BookController.delete(isbn: String)
+DELETE  /library/books/:itemIsbn    controllers.BookController.delete(itemIsbn: String)
 
 # DVD API endpoint
 GET     /library/dvd                controllers.DvdController.list
-GET     /library/dvd/:isbn          controllers.DvdController.get(isbn: String)
+GET     /library/dvd/:itemIsbn      controllers.DvdController.get(itemIsbn: String)
 POST    /library/dvd                controllers.DvdController.save
 PUT     /library/dvd                controllers.DvdController.update
-DELETE  /library/dvd/:isbn          controllers.DvdController.delete(isbn: String)
+DELETE  /library/dvd/:itemIsbn      controllers.DvdController.delete(itemIsbn: String)

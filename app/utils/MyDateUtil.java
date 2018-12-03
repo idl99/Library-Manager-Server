@@ -1,55 +1,132 @@
 package utils;
 
+
+/**
+ * Custom utility class to handle Date related logic of this application
+ */
 public class MyDateUtil {
 
+
+    /**
+     * Represents day of the month
+     */
     private int day;
+
+
+    /**
+     * Represents month of the year
+     */
     private int month;
+
+
+    /**
+     * Represents year
+     */
     private int year;
 
-    // Default empty constructor required by Ebeans to resolve deserialization of JsonObject stored in database
+
+    /**
+     * Default constructor required by Ebeans to resolve deserialization of JsonObject stored in database
+     */
     public MyDateUtil(){
     }
 
+
+    /**
+     * Constructor to create a MyDateUtil object by passing day, month, and year as arguments.
+     * @param day
+     * @param month
+     * @param year
+     */
     public MyDateUtil(int day, int month, int year) {
         this.day = day;
         this.month = month;
         this.year = year;
     }
 
+
+    /**
+     * Constructor to create a MyDateUtil object by passing in a date string as argument.
+     * @param date
+     */
     public MyDateUtil(String date){
         this.day = Integer.valueOf(date.split("/")[0]);
         this.month = Integer.valueOf(date.split("/")[1]);
         this.year = Integer.valueOf(date.split("/")[2]);
     }
 
+
+    /**
+     * Getter for day
+     */
     public int getDay() {
         return day;
     }
 
+
+    /**
+     * Setter for day
+     * @param day
+     */
     public void setDay(int day) {
         this.day = day;
     }
 
+
+    /**
+     * Getter for month
+     * @return
+     */
     public int getMonth() {
         return month;
     }
 
+
+    /**
+     * Setter for month
+     * @param month
+     */
     public void setMonth(int month) {
         this.month = month;
     }
 
+
+    /**
+     * Getter for year
+     * @return
+     */
     public int getYear() {
         return year;
     }
 
+
+    /**
+     * Setter for year
+     * @param year
+     */
     public void setYear(int year) {
         this.year = year;
     }
 
+
+    /**
+     * Utility static method to get difference as number of days between two MyDateUtil Dates
+     * @param date1
+     * @param date2
+     * @return - difference in number of days between the two days
+     */
     public static int getDifference(MyDateUtil date1, MyDateUtil date2){
         return daysElapsed(date1) - daysElapsed(date2);
     };
 
+
+    /**
+     * Utility static method to get the number of days elapsed since 1900 epoch. Output of this method
+     * is used by other methods like getDifference() to compute the difference between two dates in terms of the number
+     * of days elapsed.
+     * @param date
+     * @return
+     */
     public static int daysElapsed(MyDateUtil date){
 
         final int[] CUMULATIVE_DAYS = new int[]{0,31,59,90,120,151,181,212,243,273,304,334};
@@ -79,11 +156,13 @@ public class MyDateUtil {
 
     }
 
+
+    /**
+     * Private utility static method to check if a given year is a leap year or not
+     * @param year
+     * @return - boolean indicating true if year passed as argument is a leap year, or false if otherwise.
+     */
     private static boolean isLeapYear(int year){
-//        if (year is not divisible by 4) then (it is a common year)
-//        else if (year is not divisible by 100) then (it is a leap year)
-//        else if (year is not divisible by 400) then (it is a common year)
-//        else (it is a leap year)
         if(year%4 !=0){
             return false;
         } else if(year%100 !=0){
@@ -95,8 +174,15 @@ public class MyDateUtil {
         }
     }
 
+
+    /**
+     * Method that converts MyDateUtil object into a String and returns it to the user.
+     * @return - returns the date as a date string.
+     */
     @Override
     public String toString() {
         return this.getDay()+"/"+this.getMonth()+"/"+this.getYear();
     }
+
+
 }

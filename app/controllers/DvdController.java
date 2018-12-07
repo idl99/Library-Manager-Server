@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dao.DvdDao;
 import exceptions.MaximumCapacityException;
 import models.Dvd;
+import models.ItemTransactionLog;
 import models.Reservation;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -131,7 +132,11 @@ public class DvdController extends Controller {
     public Result delete(String isbn) {
         try {
             Dvd deletedBook = dvdDao.deleteDvd(isbn);
-            Reservation.getReservationById(isbn).delete();
+            Reservation reservation;
+            if((reservation = Reservation.getReservationById(isbn)) != null){
+                reservation.delete();
+            }
+            ItemTransactionLog.db().delete(ItemTransactionLog.getLogByItem(isbn));
             return ok(Json.toJson(String.format("Successfully deleted Dvd. Remaining library capacity for Dvd is %s",
                     String.valueOf(Dvd.MAX_LIBRARY_CAPACITY - dvdDao.getDvdCount()))));
         } catch (EntityNotFoundException e) {

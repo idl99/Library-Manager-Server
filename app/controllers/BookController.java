@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dao.BookDao;
 import exceptions.MaximumCapacityException;
 import models.Book;
+import models.ItemTransactionLog;
 import models.Reservation;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -134,7 +135,11 @@ public class BookController extends Controller {
         ObjectNode result = Json.newObject();
         try {
             Book deletedBook = bookDao.deleteBook(isbn);
-            Reservation.getReservationById(isbn).delete();
+            Reservation reservation;
+            if((reservation = Reservation.getReservationById(isbn)) != null){
+                reservation.delete();
+            }
+            ItemTransactionLog.db().delete(ItemTransactionLog.getLogByItem(isbn));
             return ok(Json.toJson(String.format("Successfully deleted Book. Remaining library capacity for Book is %s",
                     String.valueOf(Book.MAX_LIBRARY_CAPACITY - bookDao.getBookCount()))));
         } catch (EntityNotFoundException e) {

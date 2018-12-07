@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/w1673607-library-manager -Dhttp.port=${PORT} -Dplay.evolutions.db.default.autoApply=true
+web: target/universal/stage/bin/library-manager-server -Dhttp.port=${PORT} -Dplay.evolutions.db.default.autoApply=true

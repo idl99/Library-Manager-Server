@@ -213,13 +213,12 @@ public abstract class LibraryItem extends Model implements Comparable<LibraryIte
 
     /**Method to calculate the late fee on item return. Returns $0.00 if item is returned before due date
      * @param returned - the date on which the item is being returned by the reader.
-     * @param borrowed - the date on which the item has been borrowed by the reader.
      * @param maxBorrowalPeriod - the maximum period for which the item can be borrowed for
      * @return - the calculated late fee
      */
-    public BigDecimal calculateLateFee(MyDateUtil returned, MyDateUtil borrowed, int maxBorrowalPeriod){
+    public BigDecimal calculateLateFee(MyDateUtil returned, int maxBorrowalPeriod){
 
-        int difference = MyDateUtil.getDifference(returned,borrowed); // Get difference between date on which item
+        int difference = MyDateUtil.getDifference(returned,getBorrowedOn()); // Get difference between date on which item
                                                 // has been borrowed and date on which item is being returned in days.
 
         if(difference > maxBorrowalPeriod){

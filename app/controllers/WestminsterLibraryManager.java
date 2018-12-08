@@ -136,7 +136,7 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
                     item = bookDao.getBookByIsbn(isbn);
                     ItemTransactionLog.updateOnItemReturn(item,returnedOn); // Update ItemTransactionLog that item
                                                                             // has been returned by user
-                    dueFee = item.calculateLateFee(returnedOn, item.getBorrowedOn(), Book.MAX_BORROWAL_PERIOD);
+                    dueFee = item.calculateLateFee(returnedOn, Book.MAX_BORROWAL_PERIOD);
                     item.setCurrentReader(null); // Reset current reader attribute value
                     item.setBorrowedOn(null); // Reset borrowed on attribute value
                     bookDao.updateBook((Book)item);
@@ -146,7 +146,7 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
                     item = dvdDao.getDvdByIsbn(isbn);
                     ItemTransactionLog.updateOnItemReturn(item,returnedOn); // Update ItemTransactionLog that item
                                                                             // has been returned by user
-                    dueFee = item.calculateLateFee(returnedOn, item.getBorrowedOn(), Dvd.MAX_BORROWAL_PERIOD);
+                    dueFee = item.calculateLateFee(returnedOn, Dvd.MAX_BORROWAL_PERIOD);
                     item.setCurrentReader(null); // Reset current reader attribute value
                     item.setBorrowedOn(null); // Reset borrowed on attribute value
                     dvdDao.updateDvd((Dvd)item);
@@ -225,15 +225,15 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
             }
 
             if(item instanceof Book){
-                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generateFor),item.getBorrowedOn()) -
-                        Book.MAX_BORROWAL_PERIOD);
-                itemNode.put("fee", item.calculateLateFee(new MyDateUtil(generateFor),item.getBorrowedOn(),
+                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generateFor),
+                        item.getBorrowedOn()) - Book.MAX_BORROWAL_PERIOD);
+                itemNode.put("fee", item.calculateLateFee(new MyDateUtil(generateFor),
                         Book.MAX_BORROWAL_PERIOD));
 
             } else if(item instanceof Dvd){
-                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generateFor),item.getBorrowedOn())-
-                        Dvd.MAX_BORROWAL_PERIOD);
-                itemNode.put("fee", item.calculateLateFee(new MyDateUtil(generateFor),item.getBorrowedOn(),
+                itemNode.put("overdueBy", MyDateUtil.getDifference(new MyDateUtil(generateFor),
+                        item.getBorrowedOn())- Dvd.MAX_BORROWAL_PERIOD);
+                itemNode.put("fee", item.calculateLateFee(new MyDateUtil(generateFor),
                         Dvd.MAX_BORROWAL_PERIOD));
             }
 

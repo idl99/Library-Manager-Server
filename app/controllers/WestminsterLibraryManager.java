@@ -50,8 +50,8 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
 
 
     /**
-     * Method which services business logic related to Item borrowal.
-     * @return - returns an OK HTTP response to Client if Item borrowal logic is successfully executed.
+     * Method which services business logic related to Item being borrowed.
+     * @return - returns an OK HTTP response to Client if logic for item being borrowed is successfully executed.
      */
     @Override
     public Result borrowItem() {
@@ -192,7 +192,7 @@ public class WestminsterLibraryManager extends Controller implements LibraryMana
     }
 
     /**
-     * Method that services the business logic for reporting on Item Borrowals, their borrowal status
+     * Method that services the business logic for reporting on items borrowed, and their status
      * (number of days which they are overdue by), and late return fee estimates.
      * @param generateFor - the date for which the report needs to be generated for
      * @return - a custom JSON object, with the overude items, their isbn, title, date on which they were borrowed,

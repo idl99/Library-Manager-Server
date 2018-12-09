@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Entity which keeps log of Item Transactions, for Item Borrowal and Item Return.
+ * Entity which keeps log of Item Transactions, for Item being borrowed and Item Return.
  * @Entity JPA annotation is used to denote that this class models an entity which needs to be persisted in a table.
  * @Table annotation is used to give explicit name for the table in which this entity need to be persisted.
  */
@@ -149,7 +149,7 @@ public class ItemTransactionLog extends Model{
      * @param returnedOn
      */
     public static void updateOnItemReturn(LibraryItem item, MyDateUtil returnedOn){
-        //Calculate day difference and update item transaction logint dayDiff = MyDateUtil.getDifference(item.getBorrowedOn(), returnedOn);
+        //Calculate day difference and update item transaction log
         ItemTransactionLog log = getLogByItem(item.getISBN());
         int currentBorrowalDayDiff = MyDateUtil.getDifference(returnedOn, item.getBorrowedOn());
         log.setAverageBorrowalPeriod(

@@ -13,7 +13,7 @@ import java.util.Set;
 
 
 /**
- * Implementation of the Reader Dvd Dao Interface
+ * Implementation of the Dvd Dao Interface
  * Executes, handles and perform CRUD operations on Dvds' data.
  * @Singleton annotation is used to indicate to Guice that this only a single object instance of this class should
  * be created, instantiated and provided for entire application runtime.

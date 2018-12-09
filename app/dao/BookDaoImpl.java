@@ -13,7 +13,7 @@ import java.util.Set;
 
 
 /**
- * Implementation of the Book Dvd Dao Interface
+ * Implementation of the Book Dao Interface
  * Executes, handles and perform CRUD operations on Books' data.
  * @Singleton annotation is used to indicate to Guice that this class should only instantiate a single instance
  * for entire application runtime.
